@@ -3,15 +3,34 @@ import Header from "../components/Common/Header";
 import TanbsComponent from "../components/DashBoard/Tabs";
 import axios from "axios";
 import Search from "../components/DashBoard/Search";
+import PaginationComponent from "../components/DashBoard/Pagination";
 
 function DashboardPage() {
   const [coins, setCoins] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [paginatedCoins, setPaginatedCoins] = useState([]);
+
+  const handlePageChange = (event, value) => {
+    setPage(value);
+    // Value = new page number
+    var initialCount = (value - 1) * 10;
+    setPaginatedCoins(coins.slice(initialCount, initialCount + 10));
+  };
+
+  const onSearchChange = (e) => {
+    console.log(e.target.value);
+    setSearch(e.target.value);
+  };
+
+  var filteredCoins = coins.filter(
+    (item) =>
+      item.name.toLowerCase().includes(search.toLowerCase()) ||
+      item.symbol.toLowerCase().includes(search.toLowerCase())
+  );
 
   useEffect(() => {
-    // fetch(
-    //   "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&locale=en"
-    // );
-
     axios
       .get(
         "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&locale=en"
@@ -19,6 +38,7 @@ function DashboardPage() {
       .then((response) => {
         console.log("RESPONSE>>", response);
         setCoins(response.data);
+        setPaginatedCoins(response.data.slice(0, 10));
       })
       .catch((error) => {
         console.log("ERROR>>", error);
@@ -27,9 +47,12 @@ function DashboardPage() {
 
   return (
     <div>
-      <Search />
+      <Search search={search} onSearchChange={onSearchChange} />
       <Header />
-      <TanbsComponent coins={coins} />
+      <TanbsComponent coins={search ? filteredCoins : paginatedCoins} />
+      {!search && (
+        <PaginationComponent page={page} handlePageChange={handlePageChange} />
+      )}
     </div>
   );
 }

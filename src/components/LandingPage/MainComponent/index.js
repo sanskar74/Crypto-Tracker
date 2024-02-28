@@ -44,6 +44,7 @@ function MainComponent() {
         </motion.div>
       </div>
       <div className="phone-container">
+        c
         <motion.img
           src={iphone}
           className="iphone"
