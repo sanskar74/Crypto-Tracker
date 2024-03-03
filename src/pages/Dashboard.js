@@ -4,10 +4,12 @@ import TanbsComponent from "../components/DashBoard/Tabs";
 import axios from "axios";
 import Search from "../components/DashBoard/Search";
 import PaginationComponent from "../components/DashBoard/Pagination";
+import Loader from "../components/Common/Loader";
+import BackToTop from "../components/Common/BackToTop";
 
 function DashboardPage() {
   const [coins, setCoins] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [paginatedCoins, setPaginatedCoins] = useState([]);
@@ -39,21 +41,34 @@ function DashboardPage() {
         console.log("RESPONSE>>", response);
         setCoins(response.data);
         setPaginatedCoins(response.data.slice(0, 10));
+        setIsLoading(false);
       })
       .catch((error) => {
         console.log("ERROR>>", error);
+        setIsLoading(false);
       });
   }, []);
 
   return (
-    <div>
-      <Search search={search} onSearchChange={onSearchChange} />
+    <>
       <Header />
-      <TanbsComponent coins={search ? filteredCoins : paginatedCoins} />
-      {!search && (
-        <PaginationComponent page={page} handlePageChange={handlePageChange} />
+      <BackToTop />
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <div>
+          <Search search={search} onSearchChange={onSearchChange} />
+
+          <TanbsComponent coins={search ? filteredCoins : paginatedCoins} />
+          {!search && (
+            <PaginationComponent
+              page={page}
+              handlePageChange={handlePageChange}
+            />
+          )}
+        </div>
       )}
-    </div>
+    </>
   );
 }
 
